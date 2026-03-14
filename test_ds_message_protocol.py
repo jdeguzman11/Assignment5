@@ -60,6 +60,19 @@ def test_extract_direct_messages_invalid():
     assert messages == []
 
 
+def test_extract_direct_messages_missing():
+    """"Unit test for missing fields in the direct message JSON response."""
+    json_msg = '''
+    {"response": {"type": "ok", "messages":[
+        {"message": "SWE", "timestamp": "111"}
+    ]}}
+    '''
+
+    messages = ds_protocol.extract_direct_messages(json_msg)
+
+    assert messages == []
+
+
 def test_create_direct_message():
     """Unit test for creating a JSON string for sending direct message."""
     token = "example_token"
