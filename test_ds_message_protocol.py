@@ -70,3 +70,11 @@ def test_create_get_new():
     msg = ds_protocol.create_get_new(token)
 
     assert '"directmessage": "new"' in msg
+
+
+def test_create_get_all():
+    """Unit test for creating JSON string for requesting all messages."""
+    token = "example_token"
+    msg = ds_protocol.create_get_all(token)
+
+    assert '"directmessage": "all"' in msg
