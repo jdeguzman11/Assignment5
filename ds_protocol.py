@@ -4,7 +4,7 @@
 
 # ds_protocol.py
 
-""""""
+"""Functions for creating and parsing JSON messages from the DS server."""
 
 import json
 from collections import namedtuple
@@ -36,7 +36,7 @@ def extract_direct_messages(json_msg: str) -> list[MessageTuple]:
     """Extracts messages from a JSON response from the DS server."""
     try:
         json_obj = json.loads(json_msg)
-        messages = json_obj["response"]["messages"]
+        messages = json_obj["response"].get("messages", [])
 
         extracted_messages = []
         for item in messages:
