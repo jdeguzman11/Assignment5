@@ -19,3 +19,13 @@ def test_extract_json():
 
     assert result.type == "ok"
     assert result.token == "example_token"
+
+
+def test_extract_json_invalid():
+    """Unit test for handling invalid JSON responses from DS server."""
+    json_msg = "invalid json"
+
+    result = ds_protocol.extract_json(json_msg)
+
+    assert result.type is None
+    assert result.token is None
