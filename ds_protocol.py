@@ -55,3 +55,19 @@ def extract_direct_messages(json_msg: str) -> list[MessageTuple]:
 
     except (KeyError, TypeError):
         return []
+
+
+def create_direct_message(
+        token: str, entry: str, recipient: str, timestamp: str
+) -> str:
+    """Create JSON string to send a direct message."""
+    message_dict = {
+        "token": token,
+        "directmessage": {
+            "entry": entry,
+            "recipient": recipient,
+            "timestamp": timestamp
+        }
+    }
+
+    return json.dumps(message_dict)
