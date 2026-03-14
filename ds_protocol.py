@@ -71,3 +71,13 @@ def create_direct_message(
     }
 
     return json.dumps(message_dict)
+
+
+def create_get_new(token: str) -> str:
+    """Create JSoN string that requests new direct messages."""
+    message_dict = {
+        "token": token,
+        "directmessage": "new"
+    }
+
+    return json.dumps(message_dict)
