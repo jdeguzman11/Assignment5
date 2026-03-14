@@ -32,6 +32,7 @@ def test_extract_json_invalid():
 
 
 def test_extract_direct_messages():
+    """Unit test for JSON response from a direct message."""
     json_msg = '''
     {"response": {"type": "ok", "messages":[
         {"message": "Hello", "from": "markb", "timestamp": "111"},
@@ -48,3 +49,16 @@ def test_extract_direct_messages():
     assert messages[1].message == "SWE"
     assert messages[1].from_user == "jdawg"
     assert messages[1].timestamp == "711"
+
+
+def test_create_direct_message():
+    """Unit test for creating a JSON string for sending direct message."""
+    token = "example_token"
+    msg = ds_protocol.create_direct_message(
+        token, "SWE", "jdawg", "711"
+    )
+
+    assert '"token": "example_token"' in msg
+    assert '"entry": "SWE"' in msg
+    assert '"recipient": "jdawg"' in msg
+    assert '"timestamp": "711"' in msg
