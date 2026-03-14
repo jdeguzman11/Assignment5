@@ -29,3 +29,22 @@ def test_extract_json_invalid():
 
     assert result.type is None
     assert result.token is None
+
+
+def test_extract_direct_messages():
+    json_msg = '''
+    {"response": {"type": "ok", "messages":[
+        {"message": "Hello", "from": "markb", "timestamp": "111"},
+        {"message": "SWE", "from": "jdawg", "timestamp": "711"}
+    ]}}
+    '''
+
+    messages = ds_protocol.extract_direct_messages(json_msg)
+
+    assert len(messages) == 2
+    assert messages[0].message == "Hello"
+    assert messages[0].from_user == "markb"
+    assert messages[0].timestamp == "111"
+    assert messages[1].message == "SWE"
+    assert messages[1].from_user == "jdawg"
+    assert messages[1].timestamp == "711"
