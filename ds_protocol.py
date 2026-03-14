@@ -10,6 +10,9 @@ import json
 from collections import namedtuple
 
 DataTuple = namedtuple("DataTuple", ["type", "token"])
+MessageTuple = namedtuple(
+    "MessageTuple", ["message", "from_user", "timestamp"]
+    )
 
 
 def extract_json(json_msg: str) -> DataTuple:
@@ -27,3 +30,28 @@ def extract_json(json_msg: str) -> DataTuple:
         return DataTuple(None, None)
 
     return DataTuple(response_type, token)
+
+
+def extract_direct_messages(json_msg: str) -> list[MessageTuple]:
+    """Extracts messages from a JSON response from the DS server."""
+    try:
+        json_obj = json.loads(json_msg)
+        messages = json_obj["response"]["messages"]
+
+        extracted_messages = []
+        for item in messages:
+            message = item["message"]
+            from_user = item["from"]
+            timestamp = item["timestamp"]
+            extracted_messages.append(
+                MessageTuple(message, from_user, timestamp)
+            )
+
+        return extracted_messages
+
+    except json.JSONDecodeError:
+        print("Json cannot be decoded.")
+        return []
+
+    except (KeyError, TypeError):
+        return []
