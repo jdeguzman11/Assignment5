@@ -62,3 +62,11 @@ def test_create_direct_message():
     assert '"entry": "SWE"' in msg
     assert '"recipient": "jdawg"' in msg
     assert '"timestamp": "711"' in msg
+
+
+def test_create_get_new():
+    """Unit test for creating JSON string for requesting new messages."""
+    token = "example_token"
+    msg = ds_protocol.create_get_new(token)
+
+    assert '"directmessage": "new"' in msg
