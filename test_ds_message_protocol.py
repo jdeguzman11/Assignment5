@@ -51,6 +51,15 @@ def test_extract_direct_messages():
     assert messages[1].timestamp == "711"
 
 
+def test_extract_direct_messages_invalid():
+    """Unit test for invalid JSON response from a direct message."""
+    json_msg = "invalid json"
+
+    messages = ds_protocol.extract_direct_messages(json_msg)
+
+    assert messages == []
+
+
 def test_create_direct_message():
     """Unit test for creating a JSON string for sending direct message."""
     token = "example_token"
