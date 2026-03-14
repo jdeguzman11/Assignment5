@@ -3,3 +3,27 @@
 # 72329664
 
 # ds_protocol.py
+
+""""""
+
+import json
+from collections import namedtuple
+
+DataTuple = namedtuple("DataTuple", ["type", "token"])
+
+
+def extract_json(json_msg: str) -> DataTuple:
+    """Utility functions for handling DS server JSON responses."""
+    try:
+        json_obj = json.loads(json_msg)
+        response_type = json_obj["response"]["type"]
+        token = json_obj["response"].get("token", "")
+
+    except json.JSONDecodeError:
+        print("Json cannot be decoded.")
+        return DataTuple(None, None)
+
+    except (KeyError, TypeError):
+        return DataTuple(None, None)
+
+    return DataTuple(response_type, token)
