@@ -9,6 +9,7 @@
 import socket
 import time
 import ds_protocol
+import json
 
 
 class DirectMessage:
@@ -52,3 +53,14 @@ class DirectMessenger:
 
         except Exception:
             return None
+
+    def _send_json(self, send_file, message: dict) -> bool:
+        """Send JSON message to DS Server"""
+        try:
+            json_msg = json.dumps(message)
+            send_file.write(json_msg + "\r\n")
+            send_file.flush()
+            return True
+
+        except Exception:
+            return False
