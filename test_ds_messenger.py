@@ -16,3 +16,13 @@ def test_direct_message_init():
     assert msg.recipient == "jdawg"
     assert msg.message == "SWE"
     assert msg.timestamp == "711"
+
+
+def test_direct_messenger_init():
+    """Testing DirectMessenger initialization."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu, 2021"), "user", "pass")
+
+    assert messenger.dsuserver == ("clotho.ics.uci.edu, 2021")
+    assert messenger.username == "user"
+    assert messenger.password == "pass"
+    assert messenger.token is None
