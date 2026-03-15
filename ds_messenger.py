@@ -26,10 +26,10 @@ class DirectMessenger:
     """Handles direct messaging with the DS server."""
 
     def __init__(self, dsuserver=None, username=None, password=None):
-        self.token = None
         self.dsuserver = dsuserver
         self.username = username
         self.password = password
+        self.token = None
 
     def send(self, message: str, recipient: str) -> bool:
         """Sends a direct message."""
@@ -139,7 +139,59 @@ class DirectMessenger:
 
     def retrieve_all(self) -> list:
         """Retrieves all direct messages."""
-        pass
+        sock = self._connect()
+        if sock is None:
+            return []
+
+        send_file = None
+        recv_file = None
+
+        try:
+            send_file = sock.makefile("w", encoding="utf-8", newline="")
+            recv_file = sock.makefile("r", encoding="utf-8", newline="")
+
+            if not self._join_server(send_file, recv_file):
+                return []
+
+            msg = ds_protocol.create_get_all(self.token)
+
+            if not self._send_json(send_file, json.loads(msg)):
+                return []
+
+            response = recv_file.readline()
+
+            messages = ds_protocol.extract_direct_messages(response.strip())
+
+            direct_messages = []
+
+            for msg_obj in messages:
+                direct_message = DirectMessage(
+                    msg_obj.from_user,
+                    msg_obj.message,
+                    msg_obj.timestamp
+                )
+                direct_messages.append(direct_message)
+
+            return direct_messages
+
+        except Exception:
+            return []
+
+        finally:
+            try:
+                send_file.close()
+            except Exception:
+                pass
+
+            try:
+                recv_file.close()
+            except Exception:
+                pass
+
+            try:
+                sock.close()
+            except Exception:
+                pass
 
     def _connect(self):
         """Connect to the DS server and return a socket."""
