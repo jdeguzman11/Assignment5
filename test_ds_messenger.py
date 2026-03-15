@@ -26,3 +26,10 @@ def test_direct_messenger_init():
     assert messenger.username == "user"
     assert messenger.password == "pass"
     assert messenger.token is None
+
+
+def test_connect_failure():
+    """Testing _connect with failed connection."""
+    messenger = DirectMessenger(("invalid", 2006), "user", "pass")
+
+    assert messenger._connect() is None
