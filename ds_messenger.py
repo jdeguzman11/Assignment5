@@ -77,3 +77,26 @@ class DirectMessenger:
 
         except Exception:
             return ds_protocol.DataTuple(None, None)
+
+    def _join_server(self, send_file, recv_file) -> bool:
+        """Join DS server and store returned token."""
+        join_msg = {
+            "join": {
+                "username": self.username,
+                "password": self.password,
+                "token": ""
+            }
+        }
+
+        if not self._send_json(send_file, join_msg):
+            return False
+
+        response = self._recv_response(recv_file)
+        if response.type != "ok":
+            return False
+
+        if not response.token:
+            return False
+
+        self.token = response.token
+        return True
