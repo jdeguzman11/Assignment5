@@ -55,7 +55,7 @@ class DirectMessenger:
             return None
 
     def _send_json(self, send_file, message: dict) -> bool:
-        """Send JSON message to DS Server"""
+        """Send JSON message to DS server."""
         try:
             json_msg = json.dumps(message)
             send_file.write(json_msg + "\r\n")
@@ -64,3 +64,16 @@ class DirectMessenger:
 
         except Exception:
             return False
+
+    def _recv_response(self, recv_file):
+        """Receive response from DS server."""
+        try:
+            line = recv_file.readline()
+
+            if line == "":
+                return ds_protocol.DataTuple(None, None)
+
+            return ds_protocol.extract_json(line.strip())
+
+        except Exception:
+            return ds_protocol.DataTuple(None, None)
