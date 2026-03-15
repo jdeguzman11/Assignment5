@@ -40,3 +40,15 @@ class DirectMessenger:
     def retrieve_all(self) -> list:
         """Retrieves all direct messages."""
         pass
+
+    def _connect(self):
+        """Connect to the DS server and return a socket."""
+        try:
+            host, port = self.dsuserver
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(5)
+            sock.connect((host, port))
+            return sock
+
+        except Exception:
+            return None
