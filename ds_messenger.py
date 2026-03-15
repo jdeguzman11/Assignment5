@@ -4,7 +4,12 @@
 
 # ds_messenger.py
 
+"""Classes for sending/receiving messages from DS server."""
+
+
 class DirectMessage:
+    """Represents a direct message."""
+
     def __init__(self):
         self.recipient = None
         self.message = None
@@ -12,17 +17,19 @@ class DirectMessage:
 
 
 class DirectMessenger:
+    """Handles direct messaging with the DS server."""
+
     def __init__(self, dsuserver=None, username=None, password=None):
         self.token = None
 
     def send(self, message: str, recipient: str) -> bool:
-        # must return true if message successfully sent, false if send failed.
+        """Sends a direct message."""
         pass
 
     def retrieve_new(self) -> list:
-        # must return a list of DirectMessage objects containing all new messages
+        """Retrieves new direct messages."""
         pass
 
     def retrieve_all(self) -> list:
-        # must return a list of DirectMessage objects containing all messages
+        """Retrieves all direct messages."""
         pass
