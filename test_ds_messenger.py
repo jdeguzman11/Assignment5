@@ -83,3 +83,21 @@ def test_send_json_failure():
             return None
 
     assert messenger._send_json(FakeSendFile(), {"key": "value"}) is False
+
+
+def test_join_server_failure():
+    """Testing _join_server returns false if join message not sent."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu, 2021"), "user", "pass")
+
+    class FakeSendFile:
+        def write(self, _):
+            raise OSError("write failed")
+
+        def flush(self):
+            return None
+
+    class FakeRecvFile:
+        def readline(self):
+            return ""
+
+    assert messenger._join_server(FakeSendFile(), FakeRecvFile()) is False
