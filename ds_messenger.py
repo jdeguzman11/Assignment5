@@ -6,14 +6,18 @@
 
 """Classes for sending/receiving messages from DS server."""
 
+import socket
+import time
+import ds_protocol
+
 
 class DirectMessage:
     """Represents a direct message."""
 
-    def __init__(self):
-        self.recipient = None
-        self.message = None
-        self.timestamp = None
+    def __init__(self, recipient=None, message=None, timestamp=None):
+        self.recipient = recipient
+        self.message = message
+        self.timestamp = timestamp
 
 
 class DirectMessenger:
