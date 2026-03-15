@@ -33,3 +33,10 @@ def test_connect_failure():
     messenger = DirectMessenger(("invalid", 2006), "user", "pass")
 
     assert messenger._connect() is None
+
+
+def test_send_false():
+    """Testing send returns false if connections fails."""
+    messenger = DirectMessenger(("invalid", 2006), "user", "pass")
+
+    assert messenger.send("SWE", "jdawg") is False
