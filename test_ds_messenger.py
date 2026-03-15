@@ -47,3 +47,10 @@ def test_retrieve_new_empty():
     messenger = DirectMessenger(("invalid", 2006), "user", "pass")
 
     assert messenger.retrieve_new() == []
+
+
+def test_retrieve_all_empty():
+    """Test retrieve_all returns empty list if connection fails."""
+    messenger = DirectMessenger(("invalid", 2006), "user", "pass")
+
+    assert messenger.retrieve_all() == []
