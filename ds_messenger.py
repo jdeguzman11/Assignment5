@@ -8,8 +8,9 @@
 
 import socket
 import time
-import ds_protocol
 import json
+
+import ds_protocol
 
 
 class DirectMessage:
@@ -32,11 +33,109 @@ class DirectMessenger:
 
     def send(self, message: str, recipient: str) -> bool:
         """Sends a direct message."""
-        pass
+        sock = self._connect()
+        if sock is None:
+            return False
+
+        send_file = None
+        recv_file = None
+
+        try:
+            send_file = sock.makefile("w", encoding="utf-8", newline="")
+            recv_file = sock.makefile("r", encoding="utf-8", newline="")
+
+            if not self._join_server(send_file, recv_file):
+                return False
+
+            timestamp = str(time.time())
+
+            msg = ds_protocol.create_direct_message(
+                self.token,
+                message,
+                recipient,
+                timestamp
+            )
+
+            if not self._send_json(send_file, json.loads(msg)):
+                return False
+
+            response = self._recv_response(recv_file)
+            return response.type == "ok"
+
+        except Exception:
+            return False
+
+        finally:
+            try:
+                send_file.close()
+            except Exception:
+                pass
+
+            try:
+                recv_file.close()
+            except Exception:
+                pass
+
+            try:
+                sock.close()
+            except Exception:
+                pass
 
     def retrieve_new(self) -> list:
         """Retrieves new direct messages."""
-        pass
+        sock = self._connect()
+        if sock is None:
+            return []
+
+        send_file = None
+        recv_file = None
+
+        try:
+            send_file = sock.makefile("w", encoding="utf-8", newline="")
+            recv_file = sock.makefile("r", encoding="utf-8", newline="")
+
+            if not self._join_server(send_file, recv_file):
+                return []
+
+            msg = ds_protocol.create_get_new(self.token)
+
+            if not self._send_json(send_file, json.loads(msg)):
+                return []
+
+            response = recv_file.readline()
+
+            messages = ds_protocol.extract_direct_messages(response.strip())
+
+            direct_messages = []
+
+            for msg_obj in messages:
+                direct_message = DirectMessage(
+                    msg_obj.from_user,
+                    msg_obj.message,
+                    msg_obj.timestamp
+                )
+                direct_messages.append(direct_message)
+
+            return direct_messages
+
+        except Exception:
+            return []
+
+        finally:
+            try:
+                send_file.close()
+            except Exception:
+                pass
+
+            try:
+                recv_file.close()
+            except Exception:
+                pass
+
+            try:
+                sock.close()
+            except Exception:
+                pass
 
     def retrieve_all(self) -> list:
         """Retrieves all direct messages."""
