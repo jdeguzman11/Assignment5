@@ -8,6 +8,8 @@
 
 from ds_messenger import DirectMessage, DirectMessenger
 
+import ds_protocol
+
 
 def test_direct_message_init():
     """Testing DirectMessage initialization."""
@@ -54,3 +56,30 @@ def test_retrieve_all_empty():
     messenger = DirectMessenger(("invalid", 2006), "user", "pass")
 
     assert messenger.retrieve_all() == []
+
+
+def test_recv_response_empty():
+    """Test _recv_response handles empty response."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu, 2021"), "user", "pass")
+
+    class FakeRecvFile:
+        def readline(self):
+            return ""
+
+    result = messenger._recv_response(FakeRecvFile())
+
+    assert result == ds_protocol.DataTuple(None, None)
+
+
+def test_send_json_failure():
+    """Testing _send_json returns false on write failure."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu, 2021"), "user", "pass")
+
+    class FakeSendFile:
+        def write(self, _):
+            raise OSError("write failed")
+
+        def flush(self):
+            return None
+
+    assert messenger._send_json(FakeSendFile(), {"key": "value"}) is False
