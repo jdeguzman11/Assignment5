@@ -21,6 +21,9 @@ class DirectMessenger:
 
     def __init__(self, dsuserver=None, username=None, password=None):
         self.token = None
+        self.dsuserver = dsuserver
+        self.username = username
+        self.password = password
 
     def send(self, message: str, recipient: str) -> bool:
         """Sends a direct message."""
