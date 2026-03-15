@@ -40,3 +40,10 @@ def test_send_false():
     messenger = DirectMessenger(("invalid", 2006), "user", "pass")
 
     assert messenger.send("SWE", "jdawg") is False
+
+
+def test_retrieve_new_empty():
+    """Test retrieve_new returns empty list if connection fails."""
+    messenger = DirectMessenger(("invalid", 2006), "user", "pass")
+
+    assert messenger.retrieve_new() == []
