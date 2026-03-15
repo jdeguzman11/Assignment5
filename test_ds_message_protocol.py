@@ -31,6 +31,18 @@ def test_extract_json_invalid():
     assert result.token is None
 
 
+def test_extract_json_missing():
+    """"Unit test for valid JSON missing expected fields."""
+    json_msg = '''
+    {"response": {}}
+    '''
+
+    result = ds_protocol.extract_json(json_msg)
+
+    assert result.type is None
+    assert result.token is None
+
+
 def test_extract_direct_messages():
     """Unit test for JSON response from a direct message."""
     json_msg = '''
