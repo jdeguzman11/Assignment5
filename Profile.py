@@ -241,3 +241,10 @@ class Profile:
         """Adds contact if not already stored."""
         if contact not in self.contacts:
             self.contacts.append(contact)
+
+    def add_direct_message(self, contact: str, message) -> None:
+        """Stores direct message for a contact"""
+        if contact not in self.direct_messages:
+            self.direct_messages[contact] = []
+
+        self.direct_messages[contact].append(message)
