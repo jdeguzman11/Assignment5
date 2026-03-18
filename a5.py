@@ -7,7 +7,7 @@
 """Main program for DS Messneger GUI."""
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, simpledialog
 
 from Profile import Profile
 
@@ -18,6 +18,12 @@ def main():
     root.geometry("700x500")
 
     profile = Profile()
+
+    def add_user():
+        username = simpledialog.askstring("Add User", "Enter the Username:")
+        if username:
+            profile.add_contact(username)
+            contacts_list.insert(tk.END, username)
 
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
@@ -50,7 +56,11 @@ def main():
     for contact in profile.contacts:
         contacts_list.insert(tk.END, contact)
 
-    add_user_button = ttk.Button(contacts_frame, text="Add User")
+    add_user_button = ttk.Button(
+        contacts_frame,
+        text="Add User",
+        command=add_user
+        )
     add_user_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
     message_display = tk.Text(messages_frame, state="disabled", wrap="word")
