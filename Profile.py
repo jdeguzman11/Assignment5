@@ -247,7 +247,13 @@ class Profile:
         if contact not in self.direct_messages:
             self.direct_messages[contact] = []
 
-        self.direct_messages[contact].append(message)
+        msg_dict = {
+            "recipient": message.recipient,
+            "message": message.message,
+            "timestamp": message.timestamp
+        }
+
+        self.direct_messages[contact].append(msg_dict)
 
     def get_direct_messages(self, contact: str) -> list:
         """Return the stored meesages for a contact"""
