@@ -9,11 +9,15 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Profile import Profile
+
 
 def main():
     root = tk.Tk()
     root.title("ICS 32 Distributed Social Messenger")
     root.geometry("700x500")
+
+    profile = Profile()
 
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
@@ -42,6 +46,9 @@ def main():
 
     contacts_list = tk.Listbox(contacts_frame)
     contacts_list.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+
+    for contact in profile.contacts:
+        contacts_list.insert(tk.END, contact)
 
     add_user_button = ttk.Button(contacts_frame, text="Add User")
     add_user_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
