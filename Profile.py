@@ -122,6 +122,8 @@ class Profile:
         self.password = password  # REQUIRED
         self.bio = ''            # OPTIONAL
         self._posts = []         # OPTIONAL
+        self.contacts = []
+        self.direct_messages = {}
 
     """
 
@@ -224,6 +226,8 @@ class Profile:
                 self.password = obj['password']
                 self.dsuserver = obj['dsuserver']
                 self.bio = obj['bio']
+                self.contacts = obj.get('contacts', [])
+                self.direct_messages = obj.get('direct_messages', {})
                 for post_obj in obj['_posts']:
                     post = Post(post_obj['entry'], post_obj['timestamp'])
                     self._posts.append(post)
