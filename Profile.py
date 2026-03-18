@@ -248,3 +248,7 @@ class Profile:
             self.direct_messages[contact] = []
 
         self.direct_messages[contact].append(message)
+
+    def get_direct_messages(self, contact: str) -> list:
+        """Return the stored meesages for a contact"""
+        return self.direct_messages.get(contact, [])
