@@ -236,3 +236,8 @@ class Profile:
                 raise DsuProfileError(ex)
         else:
             raise DsuFileError()
+
+    def add_contact(self, contact: str) -> None:
+        """Adds contact if not already stored."""
+        if contact not in self.contacts:
+            self.contacts.append(contact)
