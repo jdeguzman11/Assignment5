@@ -19,6 +19,7 @@ def main():
     root.geometry("700x500")
 
     profile = Profile()
+    profile_path = None
     messenger = DirectMessenger(
         profile.dsuserver,
         profile.username,
@@ -30,14 +31,17 @@ def main():
         if username:
             profile.add_contact(username)
             contacts_list.insert(tk.END, username)
+            save_current_profile()
 
     def load_profile():
+        nonlocal profile_path
         filepath = filedialog.askopenfilename(
             filetypes=[("DSU Files", "*.dsu")]
         )
         if not filepath:
             return
 
+        profile_path = filepath
         profile.load_profile(filepath)
 
         messenger.dsuserver = profile.dsuserver
@@ -67,7 +71,7 @@ def main():
             if msg["direction"] == "sent":
                 message_display.insert(
                     tk.END,
-                    f"{msg['recipient']}: {msg['message']}\n"
+                    f"You: {msg['message']}\n"
                 )
             else:
                 message_display.insert(
@@ -91,14 +95,20 @@ def main():
         sent = messenger.send(message_text, contact)
         print("Send result:", sent)
 
-        new_message = DirectMessage(contact, message_text, "")
-        profile.add_direct_message(contact, new_message, "sent")
+        if sent:
+            new_message = DirectMessage(contact, message_text, "")
+            profile.add_direct_message(contact, new_message, "sent")
+            save_current_profile()
 
-        message_input.delete("1.0", tk.END)
-        show_conversation(None)
+            message_input.delete("1.0", tk.END)
+            show_conversation(None)
 
     def check_new_messages():
         new_messages = messenger.retrieve_new()
+
+        if not messenger.dsuserver or not messenger.username or not messenger.password:
+            root.after(5000, check_new_messages)
+            return
 
         for msg in new_messages:
             contact = msg.recipient
@@ -109,6 +119,9 @@ def main():
             if contact not in contacts_list.get(0, tk.END):
                 contacts_list.insert(tk.END, contact)
 
+        if new_messages:
+            save_current_profile()
+
         selection = contacts_list.curselection()
         if selection:
             selected_contact = contacts_list.get(selection[0])
@@ -116,6 +129,10 @@ def main():
                 show_conversation(None)
 
         root.after(5000, check_new_messages)
+
+    def save_current_profile():
+        if profile_path:
+            profile.save_profile(profile_path)
 
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
