@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk, simpledialog
 
 from Profile import Profile
+from ds_messenger import DirectMessage, DirectMessenger
 
 
 def main():
@@ -18,6 +19,11 @@ def main():
     root.geometry("700x500")
 
     profile = Profile()
+    messenger = DirectMessenger(
+        profile.dsuserver,
+        profile.username,
+        profile.password
+        )
 
     def add_user():
         username = simpledialog.askstring("Add User", "Enter the Username:")
@@ -33,13 +39,36 @@ def main():
         contact = contacts_list.get(selection[0])
         messages = profile.get_direct_messages(contact)
 
+        message_display.config(state="normal")
+        message_display.delete("1.0", tk.END)
+
         for msg in messages:
             message_display.insert(
                 tk.END,
-                f"{msg["recipient"]}: {msg["message"]}\n"
+                f"{msg['recipient']}: {msg['message']}\n"
             )
 
         message_display.config(state="disabled")
+
+    def send_message():
+        selection = contacts_list.curselection()
+        if not selection:
+            return
+
+        contact = contacts_list.get(selection[0])
+        message_text = message_input.get("1.0", tk.END).strip()
+
+        if not message_text:
+            return
+
+        sent = messenger.send(message_text, contact)
+        print("Send result:", sent)
+
+        new_message = DirectMessage(contact, message_text, "")
+        profile.add_direct_message(contact, new_message)
+
+        message_input.delete("1.0", tk.END)
+        show_conversation(None)
 
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
@@ -86,7 +115,11 @@ def main():
     message_input = tk.Text(input_frame, height=4, wrap="word")
     message_input.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
-    send_button = ttk.Button(input_frame, text="Send Message")
+    send_button = ttk.Button(
+        input_frame,
+        text="Send Message",
+        command=send_message
+        )
     send_button.grid(row=0, column=1, sticky="se", padx=5, pady=5)
 
     root.mainloop()
