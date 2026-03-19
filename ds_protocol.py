@@ -9,9 +9,12 @@
 import json
 from collections import namedtuple
 
-DataTuple = namedtuple("DataTuple", ["type", "token"])
+DataTuple = namedtuple(
+    "DataTuple", ["type", "message", "token"]
+    )
 MessageTuple = namedtuple(
-    "MessageTuple", ["message", "from_user", "timestamp"]
+    "MessageTuple",
+    ["type", "messages"]
     )
 
 
@@ -20,6 +23,7 @@ def extract_json(json_msg: str) -> DataTuple:
     try:
         json_obj = json.loads(json_msg)
         response_type = json_obj["response"]["type"]
+        message = json_obj["repsonse"]["message"]
         token = json_obj["response"].get("token", "")
 
     except json.JSONDecodeError:
@@ -29,25 +33,17 @@ def extract_json(json_msg: str) -> DataTuple:
     except (KeyError, TypeError):
         return DataTuple(None, None)
 
-    return DataTuple(response_type, token)
+    return DataTuple(response_type, message, token)
 
 
-def extract_direct_messages(json_msg: str) -> list[MessageTuple]:
+def extract_direct_messages(json_msg: str):
     """Extracts messages from a JSON response from the DS server."""
     try:
         json_obj = json.loads(json_msg)
-        messages = json_obj["response"].get("messages", [])
+        response_type = json_obj["response"]["type"]
+        messages = json_obj["response"]["messages"]
 
-        extracted_messages = []
-        for item in messages:
-            message = item["message"]
-            from_user = item["from"]
-            timestamp = item["timestamp"]
-            extracted_messages.append(
-                MessageTuple(message, from_user, timestamp)
-            )
-
-        return extracted_messages
+        return MessageTuple(response_type, messages)
 
     except json.JSONDecodeError:
         print("Json cannot be decoded.")
@@ -55,39 +51,3 @@ def extract_direct_messages(json_msg: str) -> list[MessageTuple]:
 
     except (KeyError, TypeError):
         return []
-
-
-def create_direct_message(
-        token: str, entry: str, recipient: str, timestamp: str
-) -> str:
-    """Create JSON string to send a direct message."""
-    message_dict = {
-        "token": token,
-        "directmessage": {
-            "entry": entry,
-            "recipient": recipient,
-            "timestamp": timestamp
-        }
-    }
-
-    return json.dumps(message_dict)
-
-
-def create_get_new(token: str) -> str:
-    """Create JSON string that requests new direct messages."""
-    message_dict = {
-        "token": token,
-        "directmessage": "new"
-    }
-
-    return json.dumps(message_dict)
-
-
-def create_get_all(token: str) -> str:
-    """Create JSON string that requests all direct messages."""
-    message_dict = {
-        "token": token,
-        "directmessage": "all"
-    }
-
-    return json.dumps(message_dict)
