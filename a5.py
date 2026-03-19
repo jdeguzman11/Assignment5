@@ -40,6 +40,10 @@ def main():
 
         profile.load_profile(filepath)
 
+        messenger.dsuserver = profile.dsuserver
+        messenger.username = profile.username
+        messenger.password = profile.password
+
         contacts_list.delete(0, tk.END)
         for contact in profile.contacts:
             contacts_list.insert(tk.END, contact)
@@ -86,6 +90,26 @@ def main():
 
         message_input.delete("1.0", tk.END)
         show_conversation(None)
+
+    def check_new_messages():
+        new_messages = messenger.retrieve_new()
+
+        for msg in new_messages:
+            contact = msg.recipient
+
+            profile.add_contact(contact)
+            profile.add_direct_message(contact, msg)
+
+            if contact not in contacts_list.get(0, tk.END):
+                contacts_list.insert(tk.END, contact)
+
+        selection = contacts_list.curselection()
+        if selection:
+            selected_contact = contacts_list.get(selection[0])
+            if any(msg.recipient == selected_contact for msg in new_messages):
+                show_conversation(None)
+
+        root.after(5000, check_new_messages)
 
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
@@ -146,6 +170,7 @@ def main():
     )
     load_profile_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
+    root.after(5000, check_new_messages)
     root.mainloop()
 
 
