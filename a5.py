@@ -25,6 +25,22 @@ def main():
             profile.add_contact(username)
             contacts_list.insert(tk.END, username)
 
+    def show_conversation(event):
+        selection = contacts_list.curselection()
+        if not selection:
+            return
+
+        contact = contacts_list.get(selection[0])
+        messages = profile.get_direct_messages(contact)
+
+        for msg in messages:
+            message_display.insert(
+                tk.END,
+                f"{msg["recipient"]}: {msg["message"]}\n"
+            )
+
+        message_display.config(state="disabled")
+
     root.columnconfigure(0, weight=1)
     root.columnconfigure(1, weight=4)
     root.rowconfigure(0, weight=1)
@@ -52,6 +68,7 @@ def main():
 
     contacts_list = tk.Listbox(contacts_frame)
     contacts_list.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+    contacts_list.bind("<<ListboxSelect>>", show_conversation)
 
     for contact in profile.contacts:
         contacts_list.insert(tk.END, contact)
