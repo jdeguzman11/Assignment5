@@ -64,10 +64,16 @@ def main():
         message_display.delete("1.0", tk.END)
 
         for msg in messages:
-            message_display.insert(
-                tk.END,
-                f"{msg['recipient']}: {msg['message']}\n"
-            )
+            if msg["direction"] == "sent":
+                message_display.insert(
+                    tk.END,
+                    f"{msg['recipient']}: {msg['message']}\n"
+                )
+            else:
+                message_display.insert(
+                    tk.END,
+                    f"{msg['recipient']}: {msg['message']}\n"
+                )
 
         message_display.config(state="disabled")
 
@@ -86,7 +92,7 @@ def main():
         print("Send result:", sent)
 
         new_message = DirectMessage(contact, message_text, "")
-        profile.add_direct_message(contact, new_message)
+        profile.add_direct_message(contact, new_message, "sent")
 
         message_input.delete("1.0", tk.END)
         show_conversation(None)
@@ -98,7 +104,7 @@ def main():
             contact = msg.recipient
 
             profile.add_contact(contact)
-            profile.add_direct_message(contact, msg)
+            profile.add_direct_message(contact, msg, "received")
 
             if contact not in contacts_list.get(0, tk.END):
                 contacts_list.insert(tk.END, contact)
