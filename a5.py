@@ -104,11 +104,15 @@ def main():
             show_conversation(None)
 
     def check_new_messages():
-        new_messages = messenger.retrieve_new()
-
-        if not messenger.dsuserver or not messenger.username or not messenger.password:
+        if not (
+            messenger.dsuserver
+            and messenger.username
+            and messenger.password
+        ):
             root.after(5000, check_new_messages)
             return
+
+        new_messages = messenger.retrieve_new()
 
         for msg in new_messages:
             contact = msg.recipient
