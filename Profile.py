@@ -190,17 +190,16 @@ class Profile:
     def save_profile(self, path: str) -> None:
         p = Path(path)
 
-        if p.exists() and p.suffix == '.dsu':
-            try:
-                f = open(p, 'w')
-                json.dump(self.__dict__, f)
-                f.close()
-            except Exception as ex:
-                raise DsuFileError(
-                    "Error while attempting to process the DSU file.", ex
-                    )
-        else:
+        if not (p.exists() and p.suffix == '.dsu'):
             raise DsuFileError("Invalid DSU file path or type")
+
+        try:
+            with open(p, "w", encoding="utf-8") as file:
+                json.dump(self.__dict__, file)
+        except Exception as e:
+            raise DsuFileError(
+                "Error while processing DSU file."
+            ) from e
 
     """
 
@@ -219,24 +218,31 @@ class Profile:
     def load_profile(self, path: str) -> None:
         p = Path(path)
 
-        if p.exists() and p.suffix == '.dsu':
-            try:
-                f = open(p, 'r')
-                obj = json.load(f)
-                self.username = obj['username']
-                self.password = obj['password']
-                self.dsuserver = obj['dsuserver']
-                self.bio = obj['bio']
-                self.contacts = obj.get('contacts', [])
-                self.direct_messages = obj.get('direct_messages', {})
-                for post_obj in obj['_posts']:
-                    post = Post(post_obj['entry'], post_obj['timestamp'])
-                    self._posts.append(post)
-                f.close()
-            except Exception as ex:
-                raise DsuProfileError(ex)
-        else:
-            raise DsuFileError()
+        if not (p.exists() and p.suffix == '.dsu'):
+            raise DsuFileError("Invalid DSU file path or type")
+
+        try:
+            with open(p, "r", encoding="utf-8") as file:
+                obj = json.load(file)
+
+            self.username = obj["username"]
+            self.password = obj["password"]
+            self.dsuserver = obj["dsuserver"]
+            self.bio = obj.get("bio", "")
+
+            self._posts = []
+            for post_obj in obj.get("_posts", []):
+                post = Post(post_obj["entry"], post_obj["timestamp"])
+                self._posts.append(post)
+
+            self.contacts = obj.get("contacts", [])
+            self.direct_messages = obj.get("direct_messages", {})
+            self.remove_duplicate_messages()
+
+        except DsuFileError:
+            raise
+        except Exception as e:
+            raise DsuProfileError(e) from e
 
     def add_contact(self, contact: str) -> None:
         """Adds contact if not already stored."""
@@ -246,7 +252,7 @@ class Profile:
     def add_direct_message(
             self, contact: str, message, direction="sent"
             ) -> None:
-        """Stores direct message for a contact"""
+        """Stores direct message for a contact."""
         if contact not in self.direct_messages:
             self.direct_messages[contact] = []
 
