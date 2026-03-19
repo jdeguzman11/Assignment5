@@ -72,6 +72,7 @@ class Post(dict):
         # If timestamp has not been set, generate a new from time module
         if self._timestamp == 0:
             self._timestamp = time.time()
+            dict.__setitem__(self, "timestamp", self._timestamp)
 
     def get_entry(self):
         return self._entry
@@ -239,14 +240,11 @@ class Profile:
 
     def add_contact(self, contact: str) -> None:
         """Adds contact if not already stored."""
-        if contact not in self.contacts:
+        if contact and contact not in self.contacts:
             self.contacts.append(contact)
 
     def add_direct_message(
-            self,
-            contact: str,
-            message,
-            direction="sent"
+            self, contact: str, message, direction="sent"
             ) -> None:
         """Stores direct message for a contact"""
         if contact not in self.direct_messages:
@@ -258,9 +256,24 @@ class Profile:
             "timestamp": message.timestamp,
             "direction": direction
         }
-
-        self.direct_messages[contact].append(msg_dict)
+        if msg_dict not in self.direct_messages[contact]:
+            self.direct_messages[contact].append(msg_dict)
 
     def get_direct_messages(self, contact: str) -> list:
         """Return the stored meesages for a contact"""
         return self.direct_messages.get(contact, [])
+
+    def remove_duplicate_messages(self) -> None:
+        cleaned_messages = {}
+
+        for contact, messages in self.direct_messages.items():
+            seen = set()
+            cleaned_messages[contact] = []
+
+            for msg in messages:
+                msg_key = json.dumps(msg, sort_keys=True)
+                if msg_key not in seen:
+                    seen.add(msg_key)
+                    cleaned_messages[contact].append(msg)
+
+        self.direct_messages = cleaned_messages
