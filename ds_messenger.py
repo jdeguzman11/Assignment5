@@ -67,12 +67,14 @@ class DirectMessenger:
 
         finally:
             try:
-                send_file.close()
+                if send_file is not None:
+                    send_file.close()
             except Exception:
                 pass
 
             try:
-                recv_file.close()
+                if recv_file is not None:
+                    recv_file.close()
             except Exception:
                 pass
 
@@ -83,62 +85,14 @@ class DirectMessenger:
 
     def retrieve_new(self) -> list:
         """Retrieves new direct messages."""
-        sock = self._connect()
-        if sock is None:
-            return []
-
-        send_file = None
-        recv_file = None
-
-        try:
-            send_file = sock.makefile("w", encoding="utf-8", newline="")
-            recv_file = sock.makefile("r", encoding="utf-8", newline="")
-
-            if not self._join_server(send_file, recv_file):
-                return []
-
-            msg = ds_protocol.create_get_new(self.token)
-
-            if not self._send_json(send_file, json.loads(msg)):
-                return []
-
-            response = recv_file.readline()
-
-            messages = ds_protocol.extract_direct_messages(response.strip())
-
-            direct_messages = []
-
-            for msg_obj in messages:
-                direct_message = DirectMessage(
-                    msg_obj.from_user,
-                    msg_obj.message,
-                    msg_obj.timestamp
-                )
-                direct_messages.append(direct_message)
-
-            return direct_messages
-
-        except Exception:
-            return []
-
-        finally:
-            try:
-                send_file.close()
-            except Exception:
-                pass
-
-            try:
-                recv_file.close()
-            except Exception:
-                pass
-
-            try:
-                sock.close()
-            except Exception:
-                pass
+        return self._retrieve_messages("new")
 
     def retrieve_all(self) -> list:
         """Retrieves all direct messages."""
+        return self._retrieve_messages("all")
+
+    def _retrieve_messages(self, request_type: str) -> list:
+        """Retrieve direct messages from DS server."""
         sock = self._connect()
         if sock is None:
             return []
@@ -153,17 +107,18 @@ class DirectMessenger:
             if not self._join_server(send_file, recv_file):
                 return []
 
-            msg = ds_protocol.create_get_all(self.token)
+            if request_type == "new":
+                msg = ds_protocol.create_get_new(self.token)
+            else:
+                msg = ds_protocol.create_get_all(self.token)
 
             if not self._send_json(send_file, json.loads(msg)):
                 return []
 
             response = recv_file.readline()
-
             messages = ds_protocol.extract_direct_messages(response.strip())
 
             direct_messages = []
-
             for msg_obj in messages:
                 direct_message = DirectMessage(
                     msg_obj.from_user,
@@ -179,12 +134,14 @@ class DirectMessenger:
 
         finally:
             try:
-                send_file.close()
+                if send_file is not None:
+                    send_file.close()
             except Exception:
                 pass
 
             try:
-                recv_file.close()
+                if recv_file is not None:
+                    recv_file.close()
             except Exception:
                 pass
 
@@ -201,7 +158,6 @@ class DirectMessenger:
             sock.settimeout(5)
             sock.connect((host, port))
             return sock
-
         except Exception:
             return None
 
@@ -212,7 +168,6 @@ class DirectMessenger:
             send_file.write(json_msg + "\r\n")
             send_file.flush()
             return True
-
         except Exception:
             return False
 
@@ -220,12 +175,10 @@ class DirectMessenger:
         """Receive response from DS server."""
         try:
             line = recv_file.readline()
-
             if line == "":
                 return ds_protocol.DataTuple(None, None)
 
             return ds_protocol.extract_json(line.strip())
-
         except Exception:
             return ds_protocol.DataTuple(None, None)
 
