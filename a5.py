@@ -7,7 +7,7 @@
 """Main program for DS Messneger GUI."""
 
 import tkinter as tk
-from tkinter import ttk, simpledialog
+from tkinter import ttk, simpledialog, filedialog
 
 from Profile import Profile
 from ds_messenger import DirectMessage, DirectMessenger
@@ -30,6 +30,23 @@ def main():
         if username:
             profile.add_contact(username)
             contacts_list.insert(tk.END, username)
+
+    def load_profile():
+        filepath = filedialog.askopenfilename(
+            filetypes=[("DSU Files", "*.dsu")]
+        )
+        if not filepath:
+            return
+
+        profile.load_profile(filepath)
+
+        contacts_list.delete(0, tk.END)
+        for contact in profile.contacts:
+            contacts_list.insert(tk.END, contact)
+
+        message_display.config(state="normal")
+        message_display.delete("1.0", tk.END)
+        message_display.config(state="disabled")
 
     def show_conversation(event):
         selection = contacts_list.curselection()
@@ -85,7 +102,7 @@ def main():
     input_frame.grid(row=1, column=1, sticky="nsew")
 
     contacts_frame.rowconfigure(0, weight=1)
-    contacts_frame.rowconfigure(1, weight=0)
+    contacts_frame.rowconfigure(2, weight=0)
     contacts_frame.columnconfigure(0, weight=1)
 
     messages_frame.rowconfigure(0, weight=1)
@@ -107,7 +124,7 @@ def main():
         text="Add User",
         command=add_user
         )
-    add_user_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+    add_user_button.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
 
     message_display = tk.Text(messages_frame, state="disabled", wrap="word")
     message_display.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
@@ -121,6 +138,13 @@ def main():
         command=send_message
         )
     send_button.grid(row=0, column=1, sticky="se", padx=5, pady=5)
+
+    load_profile_button = ttk.Button(
+        contacts_frame,
+        text="Load Profile",
+        command=load_profile
+    )
+    load_profile_button.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
 
     root.mainloop()
 
