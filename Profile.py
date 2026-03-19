@@ -242,7 +242,12 @@ class Profile:
         if contact not in self.contacts:
             self.contacts.append(contact)
 
-    def add_direct_message(self, contact: str, message) -> None:
+    def add_direct_message(
+            self,
+            contact: str,
+            message,
+            direction="sent"
+            ) -> None:
         """Stores direct message for a contact"""
         if contact not in self.direct_messages:
             self.direct_messages[contact] = []
@@ -250,7 +255,8 @@ class Profile:
         msg_dict = {
             "recipient": message.recipient,
             "message": message.message,
-            "timestamp": message.timestamp
+            "timestamp": message.timestamp,
+            "direction": direction
         }
 
         self.direct_messages[contact].append(msg_dict)
