@@ -22,9 +22,9 @@ def test_direct_message_init():
 
 def test_direct_messenger_init():
     """Testing DirectMessenger initialization."""
-    messenger = DirectMessenger(("clotho.ics.uci.edu, 2021"), "user", "pass")
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
 
-    assert messenger.dsuserver == ("clotho.ics.uci.edu, 2021")
+    assert messenger.dsuserver == ("clotho.ics.uci.edu", 2021)
     assert messenger.username == "user"
     assert messenger.password == "pass"
     assert messenger.token is None
@@ -101,3 +101,111 @@ def test_join_server_failure():
             return ""
 
     assert messenger._join_server(FakeSendFile(), FakeRecvFile()) is False
+
+
+def test_send_json_success():
+    """Testing _send_json returns true."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeSendFile:
+        def write(self, _):
+            return None
+
+        def flush(self):
+            return None
+
+    class FakeRecvFile:
+        def readline(self):
+            return '{"response":{"type":"ok","token":"hello"}}\n'
+
+    assert messenger._join_server(FakeSendFile(), FakeRecvFile()) is True
+    assert messenger.token == "hello"
+
+
+def test_join_server_success():
+    """Testing _join_server returns true and has token."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeSendFile:
+        def write(self, _):
+            return None
+
+        def flush(self):
+            return None
+
+    class FakeRecvFile:
+        def readline(self):
+            return '{"response":{"type":"ok","token":"hello"}}\n'
+
+    assert messenger._join_server(FakeSendFile(), FakeRecvFile()) is True
+    assert messenger.token == "hello"
+
+
+def test_join_server_repsonse_bad():
+    """Testing _join_server returns false on bad response."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeSendFile:
+        def write(self, _):
+            return None
+
+        def flush(self):
+            return None
+
+    class FakeRecvFile:
+        def readline(self):
+            return '{"response":{"type":"error"}}\n'
+
+    assert messenger._join_server(FakeSendFile(), FakeRecvFile()) is False
+
+
+def test_recv_response_valid():
+    """Test _recv_response with valid server response."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeRecvFile:
+        def readline(self):
+            return '{"response":{"type":"ok","token":"hello"}}\n'
+
+    result = messenger._recv_response(FakeRecvFile())
+
+    assert result.type == "ok"
+    assert result.token == "hello"
+
+
+def test_retrieve_messages_exception():
+    """Test _retrieve_messages returns empty list when exception."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeSocket:
+        def makefile(self, *_args, **_kwargs):
+            raise OSError("fail")
+
+        def close(self):
+            return None
+
+    def fake_connect():
+        return FakeSocket()
+
+    messenger._connect = fake_connect
+
+    assert messenger._retrieve_messages("new") == []
+
+
+def test_send_exception():
+    """Testing senf returns false."""
+    messenger = DirectMessenger(("clotho.ics.uci.edu", 2021), "user", "pass")
+
+    class FakeSocket:
+        def makefile(self, *_args, **_kwargs):
+            raise OSError("fail")
+
+        def close(self):
+            return None
+
+    def fake_connect():
+        return FakeSocket()
+
+    messenger._connect = fake_connect
+
+    assert messenger.send("hello", "jdawg") is False
