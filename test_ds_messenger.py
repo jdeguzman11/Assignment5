@@ -11,6 +11,7 @@ from ds_messenger import DirectMessage, DirectMessenger
 import ds_protocol
 
 
+# pylint: disable=protected-access, too-few-public-methods, missing-class-docstring, missing-function-docstring
 def test_direct_message_init():
     """Testing DirectMessage initialization."""
     msg = DirectMessage("jdawg", "SWE", "711")

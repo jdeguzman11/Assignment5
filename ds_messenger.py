@@ -13,6 +13,7 @@ import json
 import ds_protocol
 
 
+# pylint: disable=too-few-public-methods
 class DirectMessage:
     """Represents a direct message."""
 
